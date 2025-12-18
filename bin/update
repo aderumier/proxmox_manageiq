@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+IO_SCARED="\e[1;31m"
+IO_SUCCESS="\e[1;32m"
+IO_RESET="\e[0m"
+
+main() {
+  echo "Updating ManageIQ Provider Plugin for Proxmox..."
+
+  if [ ! -d "spec/manageiq" ]; then
+    echo -e "${IO_SCARED}spec/manageiq not found.${IO_RESET}"
+    echo "Please run bin/setup first."
+    exit 1
+  fi
+
+  cd spec/manageiq
+  git pull
+  cd ../..
+
+  echo -e "${IO_SUCCESS}Update complete!${IO_RESET}"
+}
+
+main "$@"
+

@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+IO_SCARED="\e[1;31m"
+IO_SUCCESS="\e[1;32m"
+IO_RESET="\e[0m"
+
+main() {
+  echo "Setting up ManageIQ Provider Plugin for Proxmox..."
+
+  if [ ! -d "spec/manageiq" ]; then
+    echo -e "${IO_SCARED}spec/manageiq not found.${IO_RESET}"
+    echo "Please clone the ManageIQ core repository first:"
+    echo "  git clone https://github.com/ManageIQ/manageiq.git spec/manageiq"
+    exit 1
+  fi
+
+  echo "Setup complete!"
+}
+
+main "$@"
+

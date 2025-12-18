@@ -1,0 +1,14 @@
+en:
+  model:
+    ManageIQ::Providers::Proxmox::InfraManager: "Proxmox VE Infrastructure Provider"
+    ManageIQ::Providers::Proxmox::InfraManager::Vm: "Proxmox Virtual Machine"
+    ManageIQ::Providers::Proxmox::InfraManager::Host: "Proxmox Host"
+    ManageIQ::Providers::Proxmox::InfraManager::Template: "Proxmox Template"
+    ManageIQ::Providers::Proxmox::InfraManager::Storage: "Proxmox Storage"
+    ManageIQ::Providers::Proxmox::InfraManager::Cluster: "Proxmox Cluster"
+  dictionary:
+    dictionary:
+      ManageIQ::Providers::Proxmox::InfraManager:
+        name: "Proxmox VE"
+        description: "Proxmox Virtual Environment"
+

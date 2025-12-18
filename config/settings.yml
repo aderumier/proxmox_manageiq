@@ -1,0 +1,31 @@
+---
+:ems:
+  :ems_proxmox:
+    :blacklisted_event_names:
+    - system
+    - user
+    :event_handling:
+      :event_groups:
+        :power:
+          :critical:
+          - vm_poweroff
+          - vm_poweron
+          - vm_reboot
+        :configuration:
+          :critical:
+          - vm_create
+          - vm_destroy
+          - vm_update
+    :refresh:
+      :inventory_object_refresh: true
+      :inventory_collections:
+        :saver_strategy: :batch
+        :use_ar_object: true
+        :targeted_arel_collections:
+          :vms:
+            :strategy: :local_db_find_missing_references
+          :templates:
+            :strategy: :local_db_find_missing_references
+          :hosts:
+            :strategy: :local_db_find_missing_references
+
