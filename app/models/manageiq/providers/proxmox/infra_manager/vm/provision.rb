@@ -42,35 +42,17 @@ module ManageIQ
             end
 
             def find_next_vmid(connection, node)
-              # Get all VMs to find next available ID
-              vms = []
+              # Use Proxmox API to get next available VM ID
+              # The API can optionally accept a vmid parameter to suggest a starting point
+              response = connection.get("/api2/json/cluster/nextid")
+              data = JSON.parse(response.body)
+              next_id = data["data"]
               
-              # Get QEMU VMs
-              begin
-                response = connection.get("/api2/json/nodes/#{node}/qemu")
-                data = JSON.parse(response.body)
-                vms.concat(data["data"] || [])
-              rescue
-                # Ignore errors
+              if next_id
+                next_id.to_s
+              else
+                raise "No available VM ID found"
               end
-              
-              # Get LXC containers
-              begin
-                response = connection.get("/api2/json/nodes/#{node}/lxc")
-                data = JSON.parse(response.body)
-                vms.concat(data["data"] || [])
-              rescue
-                # Ignore errors
-              end
-              
-              existing_ids = vms.map { |v| v["vmid"].to_i }.compact
-              
-              # Find next available ID (start from 100)
-              (100..999).each do |id|
-                return id.to_s unless existing_ids.include?(id)
-              end
-              
-              raise "No available VM ID found"
             end
 
             def create_vm_from_template(connection, node, vm_type, vmid, options)
