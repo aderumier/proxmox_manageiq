@@ -36,40 +36,40 @@ module ManageIQ
             def raw_start
               ext_management_system.with_provider_connection do |connection|
                 vmid = ems_ref.split("/").last
-                node = ems_ref.split("/")[0]
-                connection.post("/api2/json/nodes/#{node}/qemu/#{vmid}/status/start")
+                location = connection.get_vm_location(vmid)
+                connection.post("/api2/json/nodes/#{location[:node]}/#{location[:type]}/#{vmid}/status/start")
               end
             end
 
             def raw_stop
               ext_management_system.with_provider_connection do |connection|
                 vmid = ems_ref.split("/").last
-                node = ems_ref.split("/")[0]
-                connection.post("/api2/json/nodes/#{node}/qemu/#{vmid}/status/stop")
+                location = connection.get_vm_location(vmid)
+                connection.post("/api2/json/nodes/#{location[:node]}/#{location[:type]}/#{vmid}/status/stop")
               end
             end
 
             def raw_suspend
               ext_management_system.with_provider_connection do |connection|
                 vmid = ems_ref.split("/").last
-                node = ems_ref.split("/")[0]
-                connection.post("/api2/json/nodes/#{node}/qemu/#{vmid}/status/suspend")
+                location = connection.get_vm_location(vmid)
+                connection.post("/api2/json/nodes/#{location[:node]}/#{location[:type]}/#{vmid}/status/suspend")
               end
             end
 
             def raw_shutdown_guest
               ext_management_system.with_provider_connection do |connection|
                 vmid = ems_ref.split("/").last
-                node = ems_ref.split("/")[0]
-                connection.post("/api2/json/nodes/#{node}/qemu/#{vmid}/status/shutdown")
+                location = connection.get_vm_location(vmid)
+                connection.post("/api2/json/nodes/#{location[:node]}/#{location[:type]}/#{vmid}/status/shutdown")
               end
             end
 
             def raw_reboot_guest
               ext_management_system.with_provider_connection do |connection|
                 vmid = ems_ref.split("/").last
-                node = ems_ref.split("/")[0]
-                connection.post("/api2/json/nodes/#{node}/qemu/#{vmid}/status/reboot")
+                location = connection.get_vm_location(vmid)
+                connection.post("/api2/json/nodes/#{location[:node]}/#{location[:type]}/#{vmid}/status/reboot")
               end
             end
           end

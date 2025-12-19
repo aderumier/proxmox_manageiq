@@ -110,7 +110,53 @@ module ManageIQ
             yield(self)
           end
 
+          # Get the current node and type for a VM by querying cluster resources
+          # This is necessary because VMs can be migrated between nodes
+          # Returns a hash with :node and :type (qemu or lxc) keys
+          def get_vm_location(vmid)
+            resources = get_cluster_resources
+            vm_resource = resources.find { |r| r["vmid"] == vmid.to_i && (r["type"] == "qemu" || r["type"] == "lxc") }
+            
+            if vm_resource
+              {
+                :node => vm_resource["node"],
+                :type => vm_resource["type"]
+              }
+            else
+              raise ManageIQ::Providers::Proxmox::InfraManager::APIError.new(
+                "VM with ID #{vmid} not found in cluster resources",
+                404,
+                ""
+              )
+            end
+          end
+
           private
+
+          # Get cluster resources and cache for a short period to avoid repeated calls
+          def get_cluster_resources
+            @cluster_resources_cache ||= {}
+            cache_key = :resources
+            cache_time = 30 # Cache for 30 seconds
+            
+            if @cluster_resources_cache[cache_key] && 
+               (Time.now - @cluster_resources_cache[cache_key][:timestamp]) < cache_time
+              return @cluster_resources_cache[cache_key][:data]
+            end
+            
+            response = get("/api2/json/cluster/resources")
+            data = JSON.parse(response.body)
+            resources = data["data"] || []
+            # Filter to only VMs (qemu and lxc types)
+            resources = resources.select { |r| r["type"] == "qemu" || r["type"] == "lxc" }
+            
+            @cluster_resources_cache[cache_key] = {
+              :data => resources,
+              :timestamp => Time.now
+            }
+            
+            resources
+          end
 
           def ensure_authenticated
             authenticate unless @ticket

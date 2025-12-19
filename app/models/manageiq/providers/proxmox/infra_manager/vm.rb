@@ -26,8 +26,8 @@ module ManageIQ
             connection ||= ext_management_system.connect
             # Get VM details from Proxmox
             vmid = ems_ref.split("/").last
-            node = ems_ref.split("/")[0]
-            connection.get("/api2/json/nodes/#{node}/#{type_path}/#{vmid}")
+            location = connection.get_vm_location(vmid)
+            connection.get("/api2/json/nodes/#{location[:node]}/#{location[:type]}/#{vmid}")
           end
 
           def type_path
@@ -39,8 +39,9 @@ module ManageIQ
           def raw_start
             with_provider_object do |vm|
               vmid = ems_ref.split("/").last
-              node = ems_ref.split("/")[0]
-              ext_management_system.connect.post("/api2/json/nodes/#{node}/#{type_path}/#{vmid}/status/start")
+              connection = ext_management_system.connect
+              location = connection.get_vm_location(vmid)
+              connection.post("/api2/json/nodes/#{location[:node]}/#{location[:type]}/#{vmid}/status/start")
             end
             update_attributes!(:raw_power_state => "running")
           end
@@ -48,8 +49,9 @@ module ManageIQ
           def raw_stop
             with_provider_object do |vm|
               vmid = ems_ref.split("/").last
-              node = ems_ref.split("/")[0]
-              ext_management_system.connect.post("/api2/json/nodes/#{node}/#{type_path}/#{vmid}/status/stop")
+              connection = ext_management_system.connect
+              location = connection.get_vm_location(vmid)
+              connection.post("/api2/json/nodes/#{location[:node]}/#{location[:type]}/#{vmid}/status/stop")
             end
             update_attributes!(:raw_power_state => "stopped")
           end
@@ -57,8 +59,9 @@ module ManageIQ
           def raw_suspend
             with_provider_object do |vm|
               vmid = ems_ref.split("/").last
-              node = ems_ref.split("/")[0]
-              ext_management_system.connect.post("/api2/json/nodes/#{node}/#{type_path}/#{vmid}/status/suspend")
+              connection = ext_management_system.connect
+              location = connection.get_vm_location(vmid)
+              connection.post("/api2/json/nodes/#{location[:node]}/#{location[:type]}/#{vmid}/status/suspend")
             end
             update_attributes!(:raw_power_state => "suspended")
           end
@@ -66,24 +69,27 @@ module ManageIQ
           def raw_reset
             with_provider_object do |vm|
               vmid = ems_ref.split("/").last
-              node = ems_ref.split("/")[0]
-              ext_management_system.connect.post("/api2/json/nodes/#{node}/#{type_path}/#{vmid}/status/reset")
+              connection = ext_management_system.connect
+              location = connection.get_vm_location(vmid)
+              connection.post("/api2/json/nodes/#{location[:node]}/#{location[:type]}/#{vmid}/status/reset")
             end
           end
 
           def raw_shutdown_guest
             with_provider_object do |vm|
               vmid = ems_ref.split("/").last
-              node = ems_ref.split("/")[0]
-              ext_management_system.connect.post("/api2/json/nodes/#{node}/#{type_path}/#{vmid}/status/shutdown")
+              connection = ext_management_system.connect
+              location = connection.get_vm_location(vmid)
+              connection.post("/api2/json/nodes/#{location[:node]}/#{location[:type]}/#{vmid}/status/shutdown")
             end
           end
 
           def raw_reboot_guest
             with_provider_object do |vm|
               vmid = ems_ref.split("/").last
-              node = ems_ref.split("/")[0]
-              ext_management_system.connect.post("/api2/json/nodes/#{node}/#{type_path}/#{vmid}/status/reboot")
+              connection = ext_management_system.connect
+              location = connection.get_vm_location(vmid)
+              connection.post("/api2/json/nodes/#{location[:node]}/#{location[:type]}/#{vmid}/status/reboot")
             end
           end
 

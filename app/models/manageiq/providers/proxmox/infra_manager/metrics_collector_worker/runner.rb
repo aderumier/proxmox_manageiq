@@ -30,16 +30,15 @@ module ManageIQ
               parts = vm.ems_ref.split("/")
               return unless parts.length >= 3
 
-              node = parts[0]
-              vm_type = parts[1] # qemu or lxc
               vmid = parts[2]
+              location = connection.get_vm_location(vmid)
 
               # Get current VM status with metrics
-              response = connection.get("/api2/json/nodes/#{node}/#{vm_type}/#{vmid}/status/current")
+              response = connection.get("/api2/json/nodes/#{location[:node]}/#{location[:type]}/#{vmid}/status/current")
               data = JSON.parse(response.body)["data"]
 
               # Get VM configuration for max values
-              config_response = connection.get("/api2/json/nodes/#{node}/#{vm_type}/#{vmid}/config")
+              config_response = connection.get("/api2/json/nodes/#{location[:node]}/#{location[:type]}/#{vmid}/config")
               config = JSON.parse(config_response.body)["data"]
 
               # Calculate metrics

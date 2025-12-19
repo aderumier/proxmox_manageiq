@@ -87,9 +87,8 @@ module ManageIQ
 
             def clone_vm_from_template(connection, node, vm_type, vmid, template, options)
               template_parts = template.ems_ref.split("/")
-              template_node = template_parts[0]
-              template_type = template_parts[1]
               template_vmid = template_parts[2]
+              template_location = connection.get_vm_location(template_vmid)
               
               # Clone the template
               params = {
@@ -99,16 +98,17 @@ module ManageIQ
               }
               
               params[:storage] = options[:storage] if options[:storage]
-              params[:target] = node if template_node != node
+              params[:target] = node if template_location[:node] != node
               
-              response = connection.post("/api2/json/nodes/#{template_node}/#{template_type}/#{template_vmid}/clone", params)
+              response = connection.post("/api2/json/nodes/#{template_location[:node]}/#{template_location[:type]}/#{template_vmid}/clone", params)
               
               if response.status == 200
                 # Wait for clone to complete
                 wait_for_task(connection, response)
                 
-                # Configure the new VM
-                configure_vm(connection, node, vm_type, vmid, options) if options[:config]
+                # Configure the new VM - get location after clone
+                new_vm_location = connection.get_vm_location(vmid)
+                configure_vm(connection, new_vm_location[:node], new_vm_location[:type], vmid, options) if options[:config]
               else
                 raise "Failed to clone VM: #{response.body}"
               end
@@ -135,9 +135,8 @@ module ManageIQ
 
             def clone_vm(connection, source_vm, new_vmid, new_name, options)
               source_parts = source_vm.ems_ref.split("/")
-              source_node = source_parts[0]
-              source_type = source_parts[1]
               source_vmid = source_parts[2]
+              source_location = connection.get_vm_location(source_vmid)
               
               params = {
                 :newid => new_vmid,
@@ -146,9 +145,9 @@ module ManageIQ
               }
               
               params[:storage] = options[:storage] if options[:storage]
-              params[:target] = options[:node] if options[:node] && options[:node] != source_node
+              params[:target] = options[:node] if options[:node] && options[:node] != source_location[:node]
               
-              response = connection.post("/api2/json/nodes/#{source_node}/#{source_type}/#{source_vmid}/clone", params)
+              response = connection.post("/api2/json/nodes/#{source_location[:node]}/#{source_location[:type]}/#{source_vmid}/clone", params)
               
               if response.status == 200
                 wait_for_task(connection, response)
@@ -161,8 +160,11 @@ module ManageIQ
             def configure_vm(connection, node, vm_type, vmid, options)
               config = options[:config] || {}
               
+              # Get current VM location before configuring
+              location = connection.get_vm_location(vmid)
+              
               # Update VM configuration
-              response = connection.put("/api2/json/nodes/#{node}/#{vm_type}/#{vmid}/config", config)
+              response = connection.put("/api2/json/nodes/#{location[:node]}/#{location[:type]}/#{vmid}/config", config)
               
               unless response.status == 200
                 raise "Failed to configure VM: #{response.body}"

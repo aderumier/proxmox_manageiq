@@ -12,16 +12,15 @@ module ManageIQ
                 description = options[:description]
                 
                 parts = ems_ref.split("/")
-                node = parts[0]
-                vm_type = parts[1]
                 vmid = parts[2]
+                location = connection.get_vm_location(vmid)
                 
                 params = {
                   :snapname => snapshot_name
                 }
                 params[:description] = description if description
                 
-                response = connection.post("/api2/json/nodes/#{node}/#{vm_type}/#{vmid}/snapshot", params)
+                response = connection.post("/api2/json/nodes/#{location[:node]}/#{location[:type]}/#{vmid}/snapshot", params)
                 
                 if response.status == 200
                   data = JSON.parse(response.body)
@@ -36,11 +35,10 @@ module ManageIQ
             def raw_delete_snapshot(snapshot_name)
               ext_management_system.with_provider_connection do |connection|
                 parts = ems_ref.split("/")
-                node = parts[0]
-                vm_type = parts[1]
                 vmid = parts[2]
+                location = connection.get_vm_location(vmid)
                 
-                response = connection.delete("/api2/json/nodes/#{node}/#{vm_type}/#{vmid}/snapshot/#{snapshot_name}")
+                response = connection.delete("/api2/json/nodes/#{location[:node]}/#{location[:type]}/#{vmid}/snapshot/#{snapshot_name}")
                 
                 if response.status == 200
                   data = JSON.parse(response.body)
@@ -55,11 +53,10 @@ module ManageIQ
             def raw_revert_to_snapshot(snapshot_name)
               ext_management_system.with_provider_connection do |connection|
                 parts = ems_ref.split("/")
-                node = parts[0]
-                vm_type = parts[1]
                 vmid = parts[2]
+                location = connection.get_vm_location(vmid)
                 
-                response = connection.post("/api2/json/nodes/#{node}/#{vm_type}/#{vmid}/snapshot/#{snapshot_name}/rollback", {})
+                response = connection.post("/api2/json/nodes/#{location[:node]}/#{location[:type]}/#{vmid}/snapshot/#{snapshot_name}/rollback", {})
                 
                 if response.status == 200
                   data = JSON.parse(response.body)
@@ -74,11 +71,10 @@ module ManageIQ
             def get_snapshots
               ext_management_system.with_provider_connection do |connection|
                 parts = ems_ref.split("/")
-                node = parts[0]
-                vm_type = parts[1]
                 vmid = parts[2]
+                location = connection.get_vm_location(vmid)
                 
-                response = connection.get("/api2/json/nodes/#{node}/#{vm_type}/#{vmid}/snapshot")
+                response = connection.get("/api2/json/nodes/#{location[:node]}/#{location[:type]}/#{vmid}/snapshot")
                 data = JSON.parse(response.body)
                 data["data"] || []
               end
